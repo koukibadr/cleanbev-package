@@ -6,6 +6,7 @@ class CleanbevArgResults {
   CleanbevArgResults({required this.assetsPath});
 }
 
+/// Transforms command-line arguments into a [CleanbevArgResults] instance.
 class CleanbevArgTransform {
   static const _assetPathKey = 'assetsPath';
 
@@ -18,7 +19,7 @@ class CleanbevArgTransform {
 
   CleanbevArgResults parse(List<String> args) {
     final rawResults = _parser.parse(args);
-    if(rawResults[_assetPathKey] == null) {
+    if (rawResults[_assetPathKey] == null) {
       throw FormatException('The --assetsPath option is required.');
     }
     return CleanbevArgResults(assetsPath: rawResults[_assetPathKey] as String);
