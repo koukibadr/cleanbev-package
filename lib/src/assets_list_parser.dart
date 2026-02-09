@@ -10,34 +10,84 @@ class AssetsListParser {
 
   /// Parses the assets directory and checks if the assets are used in the project.
   /// Throws an exception if the assets directory is not found or if any asset is not found.
-  void parse() {
+  Future<void> parse() async {
     final assetList = fileSystem
         .directory(assetsPath)
         .listSync(recursive: true);
     final assetFiles = assetList.whereType<File>().toList();
-    checkAssetsPath(assetFiles);
+
+    print('Checking assets in dart files...');
+    await checkAssetsPath(assetFiles);
   }
 
   /// Checks if the assets are used in the project. Prints a warning if an asset is not used.
   /// Throws an exception if any asset is not found.
   /// This method uses the `grep` command to search for the asset path in the project files. It is case-insensitive.
-  void checkAssetsPath(List<File> assetList) async {
-    final listOfFiles = fileSystem.directory('lib').listSync(recursive: true);
+  Future<void> checkAssetsPath(List<File> assetList) async {
+    final genFile = checkOnGenDirectory();
     for (final asset in assetList) {
       if (!asset.existsSync()) {
         throw Exception('Asset not found: ${asset.path}');
       }
-      bool isUsed = false;
-      for (var file in listOfFiles) {
-        var result = await Process.run('grep', ['-i', asset.path, file.path]);
-        if (result.exitCode == 0) {
-          isUsed = true;
-          break;
+      bool isUsed = checkAssetUsageInLib(asset.path);
+      if (!isUsed) {
+        if (genFile.existsSync()) {
+          final assetName = getAssetNameInGen(asset);
+          isUsed = checkAssetUsageInLib(assetName);
+          if (!isUsed) {
+            print('Asset ${asset.path} is not used in the project.');
+          }
+        } else {
+          print('Asset ${asset.path} is not used in the project.');
         }
       }
-      if (!isUsed) {
-        print('Asset ${asset.path} is not used in the project.');
+    }
+  }
+
+  /// Checks if the asset is used in the lib directory.
+  /// Returns true if the asset is used, false otherwise.
+  /// Skips the generated files (.gen.dart).
+  bool checkAssetUsageInLib(String assetName) {
+    final listOfFiles = fileSystem.directory('lib').listSync(recursive: true);
+    for (var file in listOfFiles) {
+      if (file.path.endsWith('.gen.dart')) {
+        continue;
+      }
+      var result = Process.runSync('grep', ['-i', assetName, file.path]);
+      if (result.stdout.toString().isNotEmpty) {
+        return true;
       }
     }
+    return false;
+  }
+
+  File checkOnGenDirectory() {
+    return fileSystem.file('lib/gen/assets.gen.dart');
+  }
+
+  /// Transforms asset file name to the format used in the generated file.
+  String getAssetNameInGen(File asset) {
+    final assetName = asset.path.split('/').last.split('.').first;
+    final assetNameParts = assetName.split('_');
+    final upperCaseParts = assetNameParts
+        .skip(1)
+        .map((part) => part[0].toUpperCase() + part.substring(1))
+        .toList()
+        .join("");
+    final assetGenName = assetNameParts.first + upperCaseParts;
+    final name = transformAssetName(assetGenName);
+    return name;
+  }
+
+  /// Transforms asset name by converting hyphenated parts to camel case.
+  String transformAssetName(String assetName) {
+    final assetNameParts = assetName.split('-');
+    final upperCaseParts = assetNameParts
+        .skip(1)
+        .map((part) => part[0].toUpperCase() + part.substring(1))
+        .toList()
+        .join("");
+    final assetGenName = assetNameParts.first + upperCaseParts;
+    return assetGenName;
   }
 }
