@@ -1,4 +1,4 @@
-## 0.0.1
+## 1.0.0 - Initial Release
 
 ### Features
 - **Asset Detection**: Automatically scans and identifies all asset files in a specified directory
