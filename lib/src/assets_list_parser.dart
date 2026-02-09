@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:file/local.dart';
+import 'package:interact_cli/interact_cli.dart';
 
 class AssetsListParser {
   final String assetsPath;
@@ -35,10 +36,10 @@ class AssetsListParser {
           final assetName = getAssetNameInGen(asset);
           isUsed = checkAssetUsageInLib(assetName);
           if (!isUsed) {
-            print('Asset ${asset.path} is not used in the project.');
+            promptDeletionConfirmation(asset);
           }
         } else {
-          print('Asset ${asset.path} is not used in the project.');
+          promptDeletionConfirmation(asset);
         }
       }
     }
@@ -89,5 +90,19 @@ class AssetsListParser {
         .join("");
     final assetGenName = assetNameParts.first + upperCaseParts;
     return assetGenName;
+  }
+
+  void promptDeletionConfirmation(File asset) {
+    final answer = Confirm(
+      prompt:
+          'Asset ${asset.path} is not used in the project. Do you want to delete it?',
+      defaultValue: false,
+    ).interact();
+    if (answer) {
+      asset.deleteSync();
+      print('Asset ${asset.path} has been deleted.');
+    } else {
+      print('Asset ${asset.path} has not been deleted.');
+    }
   }
 }
