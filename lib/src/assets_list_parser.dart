@@ -13,12 +13,18 @@ class AssetsListParser {
   /// Throws an exception if the assets directory is not found or if any asset is not found.
   Future<void> parse() async {
     final assetList = fileSystem
-        .directory(assetsPath)
-        .listSync(recursive: true);
+        .directory(assetsPath).listSync(recursive: true);
     final assetFiles = assetList.whereType<File>().toList();
+    final imageList = assetFiles
+        .where((file) =>
+            file.path.endsWith('.png') ||
+            file.path.endsWith('.jpg') ||
+            file.path.endsWith('.jpeg') ||
+            file.path.endsWith('.svg'))
+        .toList();
 
     print('Checking assets in dart files...');
-    await checkAssetsPath(assetFiles);
+    await checkAssetsPath(imageList);
   }
 
   /// Checks if the assets are used in the project. Prints a warning if an asset is not used.
