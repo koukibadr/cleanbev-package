@@ -18,7 +18,7 @@ Add to your `pubspec.yaml` as a dev dependency:
 
 ```yaml
 dev_dependencies:
-  cleanbev: ^1.0.0
+  cleanbev: ^1.0.1
 ```
 
 Then activate it globally:

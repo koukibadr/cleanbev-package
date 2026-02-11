@@ -1,3 +1,8 @@
+## 1.0.1 - File Filter Improvements
+
+### Features
+- Improved file filtering to focus on common image formats (png, jpg, jpeg, svg) when checking for unused assets
+
 ## 1.0.0 - Initial Release
 
 ### Features
