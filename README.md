@@ -14,20 +14,13 @@ A powerful command-line tool for Dart and Flutter projects that automatically de
 
 ### As a Command-Line Tool
 
-Add to your `pubspec.yaml` as a dev dependency:
-
-```yaml
-dev_dependencies:
-  cleanbev: ^1.0.1
-```
-
-Then activate it globally:
+1- Activate it globally:
 
 ```bash
 dart pub global activate cleanbev
 ```
 
-Or run it directly from your project:
+2 - Run it directly from your project root directory:
 
 ```bash
 dart pub global run cleanbev
