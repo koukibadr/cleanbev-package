@@ -12,6 +12,12 @@ class AssetsListParser {
   /// Parses the assets directory and checks if the assets are used in the project.
   /// Throws an exception if the assets directory is not found or if any asset is not found.
   Future<void> parse() async {
+    final assetDirectory = fileSystem.directory(assetsPath);
+    if (!assetDirectory.existsSync()) {
+      print('Assets directory not found at path: $assetsPath');
+      exit(1);
+    }
+
     final assetList =
         fileSystem.directory(assetsPath).listSync(recursive: true);
     final assetFiles = assetList.whereType<File>().toList();
