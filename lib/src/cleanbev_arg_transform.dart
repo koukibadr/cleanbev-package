@@ -5,10 +5,11 @@ class CleanbevArgResults {
   final bool acceptAll;
   final bool showHelp;
 
-  CleanbevArgResults(
-      {required this.assetsPath,
-      required this.acceptAll,
-      required this.showHelp});
+  CleanbevArgResults({
+    required this.assetsPath,
+    required this.acceptAll,
+    required this.showHelp,
+  });
 }
 
 /// Transforms command-line arguments into a [CleanbevArgResults] instance.
@@ -28,6 +29,7 @@ class CleanbevArgTransform {
     )
     ..addFlag(
       _acceptAllKey,
+      abbr: 'a',
       help:
           'Accept all assets without confirmation, including those that are not used in the project. Use with caution.',
       defaultsTo: false,
@@ -44,13 +46,21 @@ class CleanbevArgTransform {
 
   CleanbevArgResults parse(List<String> args) {
     final rawResults = _parser.parse(args);
+    // Check help flag first before validating other arguments
+    if (rawResults[_helpKey] as bool) {
+      return CleanbevArgResults(
+        assetsPath: '',
+        acceptAll: false,
+        showHelp: true,
+      );
+    }
     if (rawResults[_assetPathKey] == null) {
       throw FormatException('The --assets-path argument is required.');
     }
     return CleanbevArgResults(
       assetsPath: rawResults[_assetPathKey] as String,
       acceptAll: rawResults[_acceptAllKey] as bool,
-      showHelp: rawResults[_helpKey] as bool,
+      showHelp: false,
     );
   }
 }

@@ -7,7 +7,7 @@ void main(List<String> arguments) {
     return;
   }
   final AssetsListParser parser = AssetsListParser(
-    assetsPath: config.assetsPath,
+    config: config,
   );
   parser.parse();
 }
