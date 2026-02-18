@@ -3,11 +3,13 @@ import 'package:args/args.dart';
 class CleanbevArgResults {
   final String assetsPath;
   final bool acceptAll;
+  final bool dryRun;
   final bool showHelp;
 
   CleanbevArgResults({
     required this.assetsPath,
     required this.acceptAll,
+    required this.dryRun,
     required this.showHelp,
   });
 }
@@ -19,6 +21,8 @@ class CleanbevArgTransform {
   static const _acceptAllKey = 'accept-all';
 
   static const _helpKey = 'help';
+
+  static const _dryRunKey = 'dry-run';
 
   final _parser = ArgParser()
     ..addFlag(
@@ -32,6 +36,11 @@ class CleanbevArgTransform {
       abbr: 'a',
       help:
           'Accept all assets without confirmation, including those that are not used in the project. Use with caution.',
+      defaultsTo: false,
+    )
+    ..addFlag(
+      _dryRunKey,
+      help: 'Perform a dry run without making any changes to the file system and print the assets that would be deleted.',
       defaultsTo: false,
     )
     ..addOption(
@@ -51,6 +60,7 @@ class CleanbevArgTransform {
       return CleanbevArgResults(
         assetsPath: '',
         acceptAll: false,
+        dryRun: false,
         showHelp: true,
       );
     }
@@ -60,6 +70,7 @@ class CleanbevArgTransform {
     return CleanbevArgResults(
       assetsPath: rawResults[_assetPathKey] as String,
       acceptAll: rawResults[_acceptAllKey] as bool,
+      dryRun: rawResults[_dryRunKey] as bool,
       showHelp: false,
     );
   }
