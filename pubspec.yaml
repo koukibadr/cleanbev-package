@@ -2,7 +2,7 @@ name: cleanbev
 description: A command-line tool that detects and safely removes unused assets
   from Dart and Flutter projects. Scans for asset references and prompts for
   confirmation before deletion.
-version: 1.0.2
+version: 1.0.3
 homepage: 'https://github.com/koukibadr/cleanbev-package'
 
 environment:

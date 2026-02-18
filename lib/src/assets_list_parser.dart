@@ -1,25 +1,29 @@
 import 'dart:io';
 
+import 'package:cleanbev/cleanbev.dart';
 import 'package:file/local.dart';
 import 'package:interact_cli/interact_cli.dart';
 
 class AssetsListParser {
-  final String assetsPath;
-  AssetsListParser({required this.assetsPath});
+  
+  final CleanbevArgResults config;
+
+  AssetsListParser({required this.config});
 
   final fileSystem = LocalFileSystem();
 
   /// Parses the assets directory and checks if the assets are used in the project.
   /// Throws an exception if the assets directory is not found or if any asset is not found.
   Future<void> parse() async {
-    final assetDirectory = fileSystem.directory(assetsPath);
+    final assetDirectory = fileSystem.directory(config.assetsPath);
     if (!assetDirectory.existsSync()) {
-      print('Assets directory not found at path: $assetsPath');
+      print('Assets directory not found at path: ${config.assetsPath}');
       exit(1);
     }
 
-    final assetList =
-        fileSystem.directory(assetsPath).listSync(recursive: true);
+    final assetList = fileSystem.directory(config.assetsPath).listSync(
+          recursive: true,
+        );
     final assetFiles = assetList.whereType<File>().toList();
     final imageList = assetFiles
         .where((file) =>
@@ -105,6 +109,11 @@ class AssetsListParser {
   }
 
   void promptDeletionConfirmation(File asset) {
+    if(config.acceptAll) {
+      asset.deleteSync();
+      print('Asset ${asset.path} has been deleted.');
+      return;
+    }
     final answer = Confirm(
       prompt:
           'Asset ${asset.path} is not used in the project. Do you want to delete it?',
