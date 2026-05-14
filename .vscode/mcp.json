@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "cleanbev": {
+      "type": "stdio",
+      "command": "/Volumes/Data-BK/Packages/cleanbev/mcp/.venv/bin/python",
+      "args": [
+        "/Volumes/Data-BK/Packages/cleanbev/mcp/main.py"
+      ]
+    }
+  }
+}
