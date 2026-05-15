@@ -40,7 +40,8 @@ class CleanbevArgTransform {
     )
     ..addFlag(
       _dryRunKey,
-      help: 'Perform a dry run without making any changes to the file system and print the assets that would be deleted.',
+      help:
+          'Perform a dry run without making any changes to the file system and print the assets that would be deleted.',
       defaultsTo: false,
     )
     ..addOption(

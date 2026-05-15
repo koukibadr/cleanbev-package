@@ -5,7 +5,6 @@ import 'package:file/local.dart';
 import 'package:interact_cli/interact_cli.dart';
 
 class AssetsListParser {
-  
   final CleanbevArgResults config;
 
   AssetsListParser({required this.config});
@@ -109,11 +108,11 @@ class AssetsListParser {
   }
 
   void promptDeletionConfirmation(File asset) {
-    if(config.dryRun) {
+    if (config.dryRun) {
       print('Asset ${asset.path} would be deleted (dry run).');
       return;
     }
-    if(config.acceptAll) {
+    if (config.acceptAll) {
       asset.deleteSync();
       print('Asset ${asset.path} has been deleted.');
       return;
