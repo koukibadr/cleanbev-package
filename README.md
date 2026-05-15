@@ -12,6 +12,10 @@ A powerful command-line tool for Dart and Flutter projects that automatically de
 
 ## Installation
 
+### As an MCP Server
+
+[![Install in VS Code](https://img.shields.io/badge/Install_in-VS_Code-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=cleanbev-mcp&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22--from%22%2C%22cleanbev-mcp%22%2C%22cleanbev-mcp%22%5D%2C%22env%22%3A%7B%7D%7D) [![Install in VS Code Insiders](https://img.shields.io/badge/Install_in-VS_Code_Insiders-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=cleanbev-mcp&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22--from%22%2C%22cleanbev-mcp%22%2C%22cleanbev-mcp%22%5D%2C%22env%22%3A%7B%7D%7D&quality=insiders) [![Install in Visual Studio](https://img.shields.io/badge/Install_in-Visual_Studio-C16FDE?style=flat-square&logo=visualstudio&logoColor=white)](https://vs-open.link/mcp-install?%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22--from%22%2C%22cleanbev-mcp%22%2C%22cleanbev-mcp%22%5D%2C%22env%22%3A%7B%7D%7D) [![Install in Cursor](https://img.shields.io/badge/Install_in-Cursor-000000?style=flat-square&logoColor=white)](https://cursor.com/en/install-mcp?name=cleanbev-mcp&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJjbGVhbmJldi1tY3AiLCJjbGVhbmJldi1tY3AiXSwiZW52Ijp7fX0=)
+
 ### As a Command-Line Tool
 
 1- Activate it globally:
