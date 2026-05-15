@@ -1,3 +1,12 @@
+## 1.0.3
+
+### Features
+
+- Implement MCP Layer to enable package support with LLM integration for enhanced asset analysis and management on VSCode, Cursor, GitHub Copilot, Claude Desktop, Warp.
+- Added support for `--dry-run` flag to simulate asset deletion without actually removing files.
+- Added flag `--accept-all` (`-a`) to allow users to delete all unused assets without confirmation prompts.
+- Added flag `--help` (`-h`) to display usage information and available options.
+
 ## 1.0.2
 
 ### Bug Fixes
