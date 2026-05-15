@@ -4,7 +4,7 @@
       "type": "stdio",
       "command": "/Volumes/Data-BK/Packages/cleanbev/mcp/.venv/bin/python",
       "args": [
-        "/Volumes/Data-BK/Packages/cleanbev/mcp/main.py"
+        "/Volumes/Data-BK/Packages/cleanbev/mcp/cleanbev_mcp/server.py"
       ]
     }
   }
