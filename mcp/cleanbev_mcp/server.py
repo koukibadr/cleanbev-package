@@ -6,10 +6,10 @@ from pathlib import Path
 from typing import Any
  
 import yaml
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
  
 
-mcp = FastMCP("cleanbev")
+mcp = MCPServer("cleanbev")
  
  
 @mcp.tool()
