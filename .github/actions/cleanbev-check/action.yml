@@ -25,6 +25,7 @@ runs:
         channel: stable
       
     - name: Install dependencies
+      shell: bash
       run: flutter pub get
 
     - name: Activate cleanbev
