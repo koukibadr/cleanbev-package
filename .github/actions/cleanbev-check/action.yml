@@ -46,4 +46,5 @@ runs:
 
     - name: Summary
       shell: bash
-      run: echo "Unused assets detected: ${{ steps.scan.outputs.unused-count }}"
+      run: | 
+        echo "Unused assets detected: ${{ steps.scan.outputs.unused-count }}"
