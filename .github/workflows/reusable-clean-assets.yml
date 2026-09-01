@@ -11,6 +11,10 @@ on:
         description: "Directory containing pubspec.yaml"
         type: string
         default: "."
+      blocking:
+        description: "Fail the workflow when unused assets are found"
+        type: boolean
+        default: false
     outputs:
       unused-count:
         description: "Number of unused assets detected"
@@ -30,6 +34,14 @@ jobs:
         with:
           assets-path: ${{ inputs.assets-path }}
           working-directory: ${{ inputs.working-directory }}
+          blocking: ${{ inputs.blocking }}
+
+      - name: Fail when blocking is enabled
+        if: ${{ inputs.blocking && steps.cleanbev.outputs.unused-count != '0' && steps.cleanbev.outputs.unused-count != '' }}
+        shell: bash
+        run: |
+          echo "Detected ${{ steps.cleanbev.outputs.unused-count }} unused assets, please run cleanbev locally and push changes again" >&2
+          exit 1
 
       - name: Commit deletions
         if: inputs.mode == 'delete'

@@ -10,6 +10,10 @@ inputs:
     description: "Directory containing pubspec.yaml"
     required: false
     default: "."
+  blocking:
+    description: "Fail the job when unused assets are found"
+    required: false
+    default: "false"
 
 outputs:
   unused-count:
@@ -47,8 +51,16 @@ runs:
         OUTPUT_FILE=$(mktemp)
         dart pub global run cleanbev --assets-path "${{ inputs.assets-path }}" --accept-all | tee "$OUTPUT_FILE"
 
-        COUNT=$(grep -c "is not used in the project" "$OUTPUT_FILE" || true)
+        COUNT=$(grep -c "has been deleted" "$OUTPUT_FILE" || true)
         echo "unused-count=$COUNT" >> "$GITHUB_OUTPUT"
+
+    - name: Block when unused assets are found
+      if: ${{ inputs.blocking == 'true' && steps.scan.outputs.unused-count != '0' && steps.scan.outputs.unused-count != '' }}
+      shell: bash
+      run: |
+        COUNT="${{ steps.scan.outputs.unused-count }}"
+        echo "Detected $COUNT unused assets, please run cleanbev locally and push changes again" >&2
+        exit 1
 
     - name: Summary
       shell: bash
