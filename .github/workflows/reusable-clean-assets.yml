@@ -26,7 +26,7 @@ jobs:
 
       - name: Run cleanbev
         id: cleanbev
-        uses: koukibadr/cleanbev-package/.github/actions/cleanbev-check@v1
+        uses: koukibadr/cleanbev-package/.github/actions/cleanbev-check@main
         with:
           assets-path: ${{ inputs.assets-path }}
           working-directory: ${{ inputs.working-directory }}
