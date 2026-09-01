@@ -1,0 +1,49 @@
+name: "Cleanbev Asset Check"
+description: "Finds (and optionally deletes) unused assets in a Flutter/Dart project using cleanbev"
+
+inputs:
+  assets-path:
+    description: "Path to the assets directory to scan (relative to working-directory)"
+    required: false
+    default: "assets"
+  working-directory:
+    description: "Directory containing pubspec.yaml"
+    required: false
+    default: "."
+
+outputs:
+  unused-count:
+    description: "Number of unused assets detected"
+    value: ${{ steps.scan.outputs.unused-count }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Dart
+      uses: dart-lang/setup-dart@v1
+
+    - name: Activate cleanbev
+      shell: bash
+      run: dart pub global activate cleanbev
+
+    - name: Get dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: dart pub get
+
+    - name: Run cleanbev scan
+      id: scan
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        set -o pipefail
+
+        OUTPUT_FILE=$(mktemp)
+        dart pub global run cleanbev --assets-path "${{ inputs.assets-path }}" --accept-all | tee "$OUTPUT_FILE"
+
+        COUNT=$(grep -c "is not used in the project" "$OUTPUT_FILE" || true)
+        echo "unused-count=$COUNT" >> "$GITHUB_OUTPUT"
+
+    - name: Summary
+      shell: bash
+      run: echo "Unused assets detected: ${{ steps.scan.outputs.unused-count }}"

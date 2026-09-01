@@ -1,0 +1,38 @@
+name: Reusable - Clean Unused Assets
+
+on:
+  workflow_call:
+    inputs:
+      assets-path:
+        description: "Path to the assets directory to scan"
+        type: string
+        default: "assets"
+      working-directory:
+        description: "Directory containing pubspec.yaml"
+        type: string
+        default: "."
+    outputs:
+      unused-count:
+        description: "Number of unused assets detected"
+        value: ${{ jobs.check-assets.outputs.unused-count }}
+
+jobs:
+  check-assets:
+    runs-on: ubuntu-latest
+    outputs:
+      unused-count: ${{ steps.cleanbev.outputs.unused-count }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run cleanbev
+        id: cleanbev
+        uses: koukibadr/cleanbev-package/.github/actions/cleanbev-check@v1
+        with:
+          assets-path: ${{ inputs.assets-path }}
+          working-directory: ${{ inputs.working-directory }}
+
+      - name: Commit deletions
+        if: inputs.mode == 'delete'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: remove unused assets (cleanbev)"
