@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cleanbev/cleanbev.dart';
+import 'package:cleanbev/common/extensions.dart';
 import 'package:file/local.dart';
 import 'package:interact_cli/interact_cli.dart';
 
@@ -25,15 +26,54 @@ class AssetsListParser {
         );
     final assetFiles = assetList.whereType<File>().toList();
     final imageList = assetFiles
-        .where((file) =>
-            file.path.endsWith('.png') ||
-            file.path.endsWith('.jpg') ||
-            file.path.endsWith('.jpeg') ||
-            file.path.endsWith('.svg'))
+        .where((file) => file.isImage()).toList();
+
+    final ignoreList = await parseCleanbevIgnore();
+    final filteredImageList = imageList
+        .where((file) => !ignoreList.any((ignoreFile) {
+              if (ignoreFile.isImage()) {
+                return file.path == ignoreFile.path;
+              } else {
+                return file.absolute.path
+                    .substring(0, file.absolute.path.lastIndexOf('/')+1)
+                    .contains("${ignoreFile.path}/");
+              }
+            }))
         .toList();
 
+    if (filteredImageList.isEmpty) {
+      print('No unused assets found to delete.');
+      return;
+    }
+
     print('Checking assets in dart files...');
-    await checkAssetsPath(imageList);
+    await checkAssetsPath(filteredImageList);
+  }
+
+  Future<List<File>> parseCleanbevIgnore() async {
+    final ignoreFile = fileSystem.file('.cleanbevignore');
+    if (!ignoreFile.existsSync()) {
+      print('No .cleanbevignore file found.');
+      return [];
+    }
+
+    final ignoreList = ignoreFile.readAsLinesSync();
+    print('Ignoring the following assets:');
+    List<File> ignoreListResult = [];
+    for (final path in ignoreList) {
+      if (path.trim().isEmpty || path.trim().startsWith('#')) {
+        continue;
+      }
+      print('  $path');
+      if (path.startsWith('/')) {
+        ignoreListResult.add(File(path.substring(1)));
+      } else if (path.endsWith('/')) {
+        ignoreListResult.add(File(path.substring(0, path.length - 1)));
+      } else {
+        ignoreListResult.add(File(path));
+      }
+    }
+    return ignoreListResult;
   }
 
   /// Checks if the assets are used in the project. Prints a warning if an asset is not used.
