@@ -5,12 +5,16 @@ class CleanbevArgResults {
   final bool acceptAll;
   final bool dryRun;
   final bool showHelp;
+  final bool showVersion;
+  final String outputFormat;
 
   CleanbevArgResults({
     required this.assetsPath,
     required this.acceptAll,
     required this.dryRun,
     required this.showHelp,
+    required this.showVersion,
+    required this.outputFormat,
   });
 }
 
@@ -24,11 +28,23 @@ class CleanbevArgTransform {
 
   static const _dryRunKey = 'dry-run';
 
+  static const _outputFormatKey = 'output-format';
+
+  static const _versionKey = 'version';
+
+
+
   final _parser = ArgParser()
     ..addFlag(
       _helpKey,
       abbr: 'h',
       help: 'Print this usage information.',
+      negatable: false,
+    )
+    ..addFlag(
+      _versionKey,
+      abbr: 'v',
+      help: 'Print the version information.',
       negatable: false,
     )
     ..addFlag(
@@ -50,7 +66,16 @@ class CleanbevArgTransform {
           'The path to the assets directory. Defaults to "assets". If the directory does not exist, an exception will be thrown.',
       mandatory: false,
       defaultsTo: 'assets',
+    )
+    ..addOption(
+      _outputFormatKey,
+      abbr: 'o',
+      help:
+          'Specify the output format for the results. Can be used multiple times to specify multiple formats. Supported formats: json, yaml, text. Defaults to text.',
+      allowed: ['json', 'text'],
+      defaultsTo: 'text',
     );
+    
 
   String get usage => _parser.usage;
 
@@ -63,6 +88,17 @@ class CleanbevArgTransform {
         acceptAll: false,
         dryRun: false,
         showHelp: true,
+        outputFormat: 'text',
+        showVersion: false
+      );
+    } else if (rawResults[_versionKey] as bool) {
+      return CleanbevArgResults(
+        assetsPath: '',
+        acceptAll: false,
+        dryRun: false,
+        showHelp: false,
+        outputFormat: 'text',
+        showVersion: true
       );
     }
     if (rawResults[_assetPathKey] == null) {
@@ -73,6 +109,8 @@ class CleanbevArgTransform {
       acceptAll: rawResults[_acceptAllKey] as bool,
       dryRun: rawResults[_dryRunKey] as bool,
       showHelp: false,
+      outputFormat: rawResults[_outputFormatKey] as String,
+      showVersion: false
     );
   }
 }
