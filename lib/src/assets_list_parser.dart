@@ -8,7 +8,6 @@ import 'package:file/local.dart';
 import 'package:interact_cli/interact_cli.dart';
 
 class AssetsListParser {
-
   final CleanbevArgResults config;
 
   AssetsListParser({required this.config});

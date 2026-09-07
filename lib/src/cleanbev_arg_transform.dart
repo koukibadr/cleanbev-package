@@ -32,8 +32,6 @@ class CleanbevArgTransform {
 
   static const _versionKey = 'version';
 
-
-
   final _parser = ArgParser()
     ..addFlag(
       _helpKey,
@@ -75,7 +73,6 @@ class CleanbevArgTransform {
       allowed: ['json', 'text'],
       defaultsTo: 'text',
     );
-    
 
   String get usage => _parser.usage;
 
@@ -84,33 +81,30 @@ class CleanbevArgTransform {
     // Check help flag first before validating other arguments
     if (rawResults[_helpKey] as bool) {
       return CleanbevArgResults(
-        assetsPath: '',
-        acceptAll: false,
-        dryRun: false,
-        showHelp: true,
-        outputFormat: 'text',
-        showVersion: false
-      );
+          assetsPath: '',
+          acceptAll: false,
+          dryRun: false,
+          showHelp: true,
+          outputFormat: 'text',
+          showVersion: false);
     } else if (rawResults[_versionKey] as bool) {
       return CleanbevArgResults(
-        assetsPath: '',
-        acceptAll: false,
-        dryRun: false,
-        showHelp: false,
-        outputFormat: 'text',
-        showVersion: true
-      );
+          assetsPath: '',
+          acceptAll: false,
+          dryRun: false,
+          showHelp: false,
+          outputFormat: 'text',
+          showVersion: true);
     }
     if (rawResults[_assetPathKey] == null) {
       throw FormatException('The --assets-path argument is required.');
     }
     return CleanbevArgResults(
-      assetsPath: rawResults[_assetPathKey] as String,
-      acceptAll: rawResults[_acceptAllKey] as bool,
-      dryRun: rawResults[_dryRunKey] as bool,
-      showHelp: false,
-      outputFormat: rawResults[_outputFormatKey] as String,
-      showVersion: false
-    );
+        assetsPath: rawResults[_assetPathKey] as String,
+        acceptAll: rawResults[_acceptAllKey] as bool,
+        dryRun: rawResults[_dryRunKey] as bool,
+        showHelp: false,
+        outputFormat: rawResults[_outputFormatKey] as String,
+        showVersion: false);
   }
 }

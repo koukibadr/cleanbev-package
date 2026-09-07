@@ -52,6 +52,13 @@ cleanbev --assets-path assets/images
 
 The default assets directory is `assets`.
 
+### Ignore assets setup
+By default cleanbev scan all the folder and its subfolders, you can define `.cleanbevignore` and add all the assets or path that will be ignored while scanning.
+
+### Output format
+You can change the output format of cleanbev scan result by providing the `--output-format` or `-o` option. By default the output format is `text`, also you can set it to `json`.
+
+
 ## How It Works
 
 1. **Scanning**: Cleanbev reads your `pubspec.yaml` to find all declared assets
