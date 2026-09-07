@@ -1,3 +1,18 @@
+## 1.1.0
+
+### Features
+
+- Added `--version/-v` to display the current package version.
+- Added `--output-format/-o` with text and JSON output options.
+- Added formatted reporting for deleted and unused assets.
+- Added support for excluding image files and image directories listed in .cleanbevignore from asset checks.
+- Added support for recognizing additional image formats, including GIF, BMP, and WebP files.
+- Added a message and early exit when no eligible images remain after filtering.
+
+### Bug Fixes
+
+- Improved messaging when the assets directory is unavailable.
+
 ## 1.0.3
 
 ### Features

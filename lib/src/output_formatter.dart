@@ -21,11 +21,13 @@ class OutputFormatter {
 
   Map<String, dynamic> formatOutputAsMap(List<File> deletedAssets) {
     return {
-      'deleted_assets': deletedAssets.map((file) => {
-        "name": file.path.split('/').last,
-        "path": file.path,
-        "type": file.path.split('.').last,
-      }).toList(),
+      'deleted_assets': deletedAssets
+          .map((file) => {
+                "name": file.path.split('/').last,
+                "path": file.path,
+                "type": file.path.split('.').last,
+              })
+          .toList(),
       'total_deleted': deletedAssets.length,
     };
   }
