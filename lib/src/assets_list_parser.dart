@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cleanbev/cleanbev.dart';
 import 'package:cleanbev/common/extensions.dart';
+import 'package:cleanbev/common/print_logger.dart';
 import 'package:file/local.dart';
 import 'package:interact_cli/interact_cli.dart';
 
@@ -17,7 +18,7 @@ class AssetsListParser {
   Future<void> parse() async {
     final assetDirectory = fileSystem.directory(config.assetsPath);
     if (!assetDirectory.existsSync()) {
-      print('Assets directory not found at path: ${config.assetsPath}');
+      logError('Assets directory not found at path: ${config.assetsPath}');
       exit(1);
     }
 
@@ -42,29 +43,29 @@ class AssetsListParser {
         .toList();
 
     if (filteredImageList.isEmpty) {
-      print('No unused assets found to delete.');
+      logSuccess('No unused assets found to delete.');
       return;
     }
 
-    print('Checking assets in dart files...');
+    log('Checking assets in dart files...');
     await checkAssetsPath(filteredImageList);
   }
 
   Future<List<File>> parseCleanbevIgnore() async {
     final ignoreFile = fileSystem.file('.cleanbevignore');
     if (!ignoreFile.existsSync()) {
-      print('No .cleanbevignore file found.');
+      logWarning('No .cleanbevignore file found.');
       return [];
     }
 
     final ignoreList = ignoreFile.readAsLinesSync();
-    print('Ignoring the following assets:');
+    log('Ignoring the following assets:');
     List<File> ignoreListResult = [];
     for (final path in ignoreList) {
       if (path.trim().isEmpty || path.trim().startsWith('#')) {
         continue;
       }
-      print('  $path');
+      log('  $path');
       if (path.startsWith('/')) {
         ignoreListResult.add(File(path.substring(1)));
       } else if (path.endsWith('/')) {
@@ -149,12 +150,12 @@ class AssetsListParser {
 
   void promptDeletionConfirmation(File asset) {
     if (config.dryRun) {
-      print('Asset ${asset.path} would be deleted (dry run).');
+      logSuccess('Asset ${asset.path} would be deleted (dry run).');
       return;
     }
     if (config.acceptAll) {
       asset.deleteSync();
-      print('Asset ${asset.path} has been deleted.');
+      logSuccess('Asset ${asset.path} has been deleted.');
       return;
     }
     final answer = Confirm(
@@ -164,9 +165,9 @@ class AssetsListParser {
     ).interact();
     if (answer) {
       asset.deleteSync();
-      print('Asset ${asset.path} has been deleted.');
+      logSuccess('Asset ${asset.path} has been deleted.');
     } else {
-      print('Asset ${asset.path} has not been deleted.');
+      logWarning('Asset ${asset.path} has not been deleted.');
     }
   }
 }
