@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:cleanbev/cleanbev.dart';
 import 'package:cleanbev/common/extensions.dart';
 import 'package:cleanbev/common/print_logger.dart';
+import 'package:cleanbev/src/output_formatter.dart';
 import 'package:file/local.dart';
 import 'package:interact_cli/interact_cli.dart';
 
 class AssetsListParser {
+
   final CleanbevArgResults config;
 
   AssetsListParser({required this.config});
@@ -18,16 +20,14 @@ class AssetsListParser {
   Future<void> parse() async {
     final assetDirectory = fileSystem.directory(config.assetsPath);
     if (!assetDirectory.existsSync()) {
-      logError('Assets directory not found at path: ${config.assetsPath}');
+      logError('Assets directory not found: ${config.assetsPath}');
       exit(1);
     }
 
-    final assetList = fileSystem.directory(config.assetsPath).listSync(
-          recursive: true,
-        );
+    final assetList =
+        fileSystem.directory(config.assetsPath).listSync(recursive: true);
     final assetFiles = assetList.whereType<File>().toList();
-    final imageList = assetFiles
-        .where((file) => file.isImage()).toList();
+    final imageList = assetFiles.where((file) => file.isImage()).toList();
 
     final ignoreList = await parseCleanbevIgnore();
     final filteredImageList = imageList
@@ -36,30 +36,27 @@ class AssetsListParser {
                 return file.path == ignoreFile.path;
               } else {
                 return file.absolute.path
-                    .substring(0, file.absolute.path.lastIndexOf('/')+1)
+                    .substring(0, file.absolute.path.lastIndexOf('/') + 1)
                     .contains("${ignoreFile.path}/");
               }
             }))
         .toList();
 
     if (filteredImageList.isEmpty) {
-      logSuccess('No unused assets found to delete.');
+      logSuccess('No assets found in the directory ${config.assetsPath}.');
       return;
     }
 
-    log('Checking assets in dart files...');
     await checkAssetsPath(filteredImageList);
   }
 
   Future<List<File>> parseCleanbevIgnore() async {
     final ignoreFile = fileSystem.file('.cleanbevignore');
     if (!ignoreFile.existsSync()) {
-      logWarning('No .cleanbevignore file found.');
       return [];
     }
 
     final ignoreList = ignoreFile.readAsLinesSync();
-    log('Ignoring the following assets:');
     List<File> ignoreListResult = [];
     for (final path in ignoreList) {
       if (path.trim().isEmpty || path.trim().startsWith('#')) {
@@ -82,6 +79,10 @@ class AssetsListParser {
   /// This method uses the `grep` command to search for the asset path in the project files. It is case-insensitive.
   Future<void> checkAssetsPath(List<File> assetList) async {
     final genFile = checkOnGenDirectory();
+
+    final List<File> unusedAssets = [];
+    OutputFormatter outputFormatter = OutputFormatter(config.outputFormat);
+
     for (final asset in assetList) {
       if (!asset.existsSync()) {
         throw Exception('Asset not found: ${asset.path}');
@@ -92,13 +93,20 @@ class AssetsListParser {
           final assetName = getAssetNameInGen(asset);
           isUsed = checkAssetUsageInLib(assetName);
           if (!isUsed) {
-            promptDeletionConfirmation(asset);
+            final deleted = promptDeletionConfirmation(asset);
+            if (deleted) {
+              unusedAssets.add(asset);
+            }
           }
         } else {
-          promptDeletionConfirmation(asset);
+          final deleted = promptDeletionConfirmation(asset);
+          if (deleted) {
+            unusedAssets.add(asset);
+          }
         }
       }
     }
+    outputFormatter.formatOutput(unusedAssets);
   }
 
   /// Checks if the asset is used in the lib directory.
@@ -148,15 +156,13 @@ class AssetsListParser {
     return assetGenName;
   }
 
-  void promptDeletionConfirmation(File asset) {
+  bool promptDeletionConfirmation(File asset) {
     if (config.dryRun) {
-      logSuccess('Asset ${asset.path} would be deleted (dry run).');
-      return;
+      return true;
     }
     if (config.acceptAll) {
       asset.deleteSync();
-      logSuccess('Asset ${asset.path} has been deleted.');
-      return;
+      return true;
     }
     final answer = Confirm(
       prompt:
@@ -165,9 +171,9 @@ class AssetsListParser {
     ).interact();
     if (answer) {
       asset.deleteSync();
-      logSuccess('Asset ${asset.path} has been deleted.');
+      return true;
     } else {
-      logWarning('Asset ${asset.path} has not been deleted.');
+      return false;
     }
   }
 }
