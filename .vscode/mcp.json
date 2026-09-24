@@ -1,3 +1,9 @@
 {
-	"servers": {}
+	"servers": {
+		"cleanbev": {
+			"type": "stdio",
+			"command": "${workspaceFolder}/mcp/.venv/bin/python",
+			"args": ["${workspaceFolder}/mcp/cleanbev_mcp/server.py"]
+   	 }
+	}
 }
