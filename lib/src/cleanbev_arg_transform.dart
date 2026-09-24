@@ -86,7 +86,8 @@ class CleanbevArgTransform {
           dryRun: false,
           showHelp: true,
           outputFormat: 'text',
-          showVersion: false);
+          showVersion: false
+        );
     } else if (rawResults[_versionKey] as bool) {
       return CleanbevArgResults(
           assetsPath: '',

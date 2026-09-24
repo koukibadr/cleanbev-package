@@ -5,11 +5,13 @@ import json
 from pathlib import Path
 from typing import Any
  
+import re
+
 import yaml
-from mcp.server.mcpserver import MCPServer
+from mcp.server.fastmcp import FastMCP
  
 
-mcp = MCPServer("cleanbev")
+mcp = FastMCP("cleanbev")
  
  
 @mcp.tool()
@@ -97,17 +99,31 @@ def verify_flutter_project(project_path: str) -> str:
     }, indent=2)
  
 
- @mcp.tool()
- def scan(project_path: str) -> str :
+
+def _strip_ansi(text: str) -> str:
+    """Remove ANSI color codes from CLI output."""
+    return re.sub(r'\x1b\[[0-9;]*m', '', text)
+
+def _parse_unused_assets(output: str) -> list[str]:
     """
-    List all unused assets in a Flutter project WITHOUT deleting anything.
-    Always call this first and show the results to the user before cleaning.
+    Extract only actual asset file paths from cleanbev output.
+    Filters out headers, totals, ANSI codes, and empty lines.
+    """
+    cleaned = _strip_ansi(output)
+    lines = []
+    for line in cleaned.splitlines():
+        line = line.strip()
+        # Keep only lines that look like file paths
+        if line.startswith("-") and ("assets/" in line or "images/" in line):
+            lines.append(line.lstrip("- ").strip())
+    return lines
 
-    Args:
-        project_path: Absolute path to the Flutter project root.
-
-    Returns:
-        JSON with the list of unused assets found.
+@mcp.tool()
+def scan_assets(project_path: str) -> str:
+    """
+    Scan a Flutter project for unused assets WITHOUT deleting anything.
+    If unused_count is 0, stop — do NOT call clean_assets.
+    Only call clean_assets if unused_count > 0 AND user confirms.
     """
     verification_raw = verify_flutter_project(project_path)
     verification = json.loads(verification_raw)
@@ -115,26 +131,47 @@ def verify_flutter_project(project_path: str) -> str:
     if not verification.get("is_flutter"):
         return json.dumps({
             "success": False,
-            "message": f"Aborted: {verification.get('message')}",
+            "message": verification.get("message"),
         }, indent=2)
 
     try:
         result = subprocess.run(
-            ["dart", "pub", "global", "run", "cleanbev", "--dry-run"],
+            ["dart", "pub", "global", "run", "cleanbev", "--dry-run"],  # ✅ dry-run only
             capture_output=True,
             text=True,
             cwd=project_path,
         )
+
+        unused_lines = _parse_unused_assets(result.stdout)
+
+        # ✅ Clean project — stop here, nothing to do
+        if not unused_lines:
+            return json.dumps({
+                "success": True,
+                "unused_count": 0,
+                "should_delete": False,
+                "message": "✅ Your project is clean — no unused assets found. Nothing to delete.",
+            }, indent=2)
+
+        # ⚠️ Assets found — ask for confirmation
         return json.dumps({
-            "success": result.returncode == 0,
-            "unused_assets": result.stdout.strip(),
-            "message": "⚠️ Review the list above, then call clean_assets() with confirmed=True to delete.",
+            "success": True,
+            "unused_count": len(unused_lines),
+            "unused_assets": unused_lines,
+            "should_delete": False,
+            "message": f"Found {len(unused_lines)} unused asset(s). Waiting for user confirmation before deletion.",
+            "next_action": {
+                "tool": "clean_assets",
+                "args": {"project_path": project_path, "confirmed": True},
+                "requires_confirmation": True,
+                "confirmation_message": f"Delete these {len(unused_lines)} unused asset(s)?",
+            }
         }, indent=2)
 
     except FileNotFoundError:
         return json.dumps({
             "success": False,
-            "message": "❌ 'dart' not found on PATH.",
+            "message": "❌ dart not found on PATH.",
         }, indent=2)
  
 
