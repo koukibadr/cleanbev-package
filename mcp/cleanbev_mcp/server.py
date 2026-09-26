@@ -119,11 +119,16 @@ def _parse_unused_assets(output: str) -> list[str]:
     return lines
 
 @mcp.tool()
-def scan_assets(project_path: str) -> str:
+def scan_assets(project_path: str, assets_path: str) -> str:
     """
     Scan a Flutter project for unused assets WITHOUT deleting anything.
     If unused_count is 0, stop — do NOT call clean_assets.
     Only call clean_assets if unused_count > 0 AND user confirms.
+
+    Args:
+        project_path: Absolute path to the Flutter project root (must contain pubspec.yaml).
+        assets_path: Relative path to the assets folder inside the project (default: 'assets').
+                     Example: 'assets', 'lib/assets', 'resources/images'.
     """
     verification_raw = verify_flutter_project(project_path)
     verification = json.loads(verification_raw)
@@ -136,7 +141,7 @@ def scan_assets(project_path: str) -> str:
 
     try:
         result = subprocess.run(
-            ["dart", "pub", "global", "run", "cleanbev", "--dry-run"],  # ✅ dry-run only
+            ["dart", "pub", "global", "run", "cleanbev", "--assets-path", assets_path, "--dry-run"],  # ✅ dry-run only
             capture_output=True,
             text=True,
             cwd=project_path,
@@ -162,7 +167,7 @@ def scan_assets(project_path: str) -> str:
             "message": f"Found {len(unused_lines)} unused asset(s). Waiting for user confirmation before deletion.",
             "next_action": {
                 "tool": "clean_assets",
-                "args": {"project_path": project_path, "confirmed": True},
+                "args": {"project_path": project_path, "assets_path": assets_path,  "confirmed": True},
                 "requires_confirmation": True,
                 "confirmation_message": f"Delete these {len(unused_lines)} unused asset(s)?",
             }
@@ -177,7 +182,7 @@ def scan_assets(project_path: str) -> str:
 
  
 @mcp.tool()
-def clean_assets(project_path: str, confirmed: bool = False) -> str:
+def clean_assets(project_path: str, assets_path: str, confirmed: bool = False) -> str:
     """
     Delete unused assets ONLY after the user has reviewed the scan results
     and explicitly confirmed. Requires confirmed=True — this is the safety gate.
@@ -188,9 +193,8 @@ def clean_assets(project_path: str, confirmed: bool = False) -> str:
     Args:
         project_path: Absolute path to the Flutter project root.
         confirmed: Must be True — set only after explicit user approval.
-
-    Returns:
-        JSON with deletion results or rejection message.
+        assets_path: Relative path to the assets folder (default: 'assets').
+                     Must match the value used in scan_assets.
     """
     if not confirmed:
         return json.dumps({
@@ -210,7 +214,7 @@ def clean_assets(project_path: str, confirmed: bool = False) -> str:
 
     try:
         result = subprocess.run(
-            ["dart", "pub", "global", "run", "cleanbev", "-a"],
+            ["dart", "pub", "global", "run", "cleanbev", "--assets-path", assets_path, "-a"],
             capture_output=True,
             text=True,
             cwd=project_path,
